@@ -1,19 +1,22 @@
 const request = require('request');
-const breed = process.argv[2];
 // error test
 // const url = "ht://apieds/seasdfadsfarch?q=";
 const url = "https://api.thecatapi.com/v1/breeds/search?q=";
-const searchBreedUrl = url + breed;
 
-request(searchBreedUrl, (error, response, body) => {
-  if (error) return error;
+const fetchBreedDescription = function(breedName, callback) {
+  request(url + breedName, (error, response, body) => {
+    // If there is an error in the request, returns error and passes no description.
+    if (error) return callback(error, null);
+  
+    const data = JSON.parse(body)[0];
 
-  const data = JSON.parse(body)[0];
+    // If the breed does not exist from the search, passes no errors, and a description of "breed not found."
+    if (!data) return callback(null, "Breed not found.");
 
-  if (!data) {
-    console.log("Breed not found.");
-    process.exit();
-  }
+    // After all edge cases are checked, passes no errors and returns description.
+    const description = data.description;
+    return callback(null, description);
+  });
+};
 
-  console.log(data.description);
-});
+module.exports = { fetchBreedDescription };
